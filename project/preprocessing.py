@@ -76,7 +76,7 @@ def cli_main():
     parser.add_argument('--output_dir', type=str, default=os.getcwd())
     parser.add_argument('--vgg_compatible', type=bool, default=True)
     parser.add_argument('--frames_to_skip', type=int, default=30)
-    parser.add_argument('--resize', type=tuple, default=(256, 256))
+    parser.add_argument('--resize', type=tuple, default=(224, 224))
     parser.add_argument('--val_split', type=float, default=0.1)
     args = parser.parse_args()
 
