@@ -35,13 +35,7 @@ class LungTumorDataset(torch.utils.data.Dataset):
         return np.moveaxis(data, -1, 0), np.expand_dims(mask, axis=0)
 
 
-def get_datasets(preprocessed_input_dir, aug_pipeline):
-    train_data_dir = os.path.join(preprocessed_input_dir, 'train', 'data')
-    train_label_dir = os.path.join(preprocessed_input_dir, 'train', 'mask')
-    validation_data_dir = os.path.join(preprocessed_input_dir, 'val', 'data')
-    validation_label_dir = os.path.join(preprocessed_input_dir, 'val', 'data')
-
-    training_data = LungTumorDataset(train_data_dir, train_label_dir, transform=aug_pipeline)
-    validation_data = LungTumorDataset(validation_data_dir, validation_label_dir, transform=None)
-    return training_data, validation_data
-
+def get_dataset(preprocessed_input_dir, aug_pipeline=None, data_type='train'):
+    data_dir = os.path.join(preprocessed_input_dir, data_type, 'data')
+    label_dir = os.path.join(preprocessed_input_dir, data_type, 'mask')
+    return LungTumorDataset(data_dir, label_dir, transform=aug_pipeline)
