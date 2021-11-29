@@ -26,6 +26,12 @@ Example result:
 
 ![Side by Side](/images/sidebyside.png)
 
+### Here is the prediction for an entire ct scan
+
+https://user-images.githubusercontent.com/17112442/143877689-bd9221f4-ff81-4072-a359-e077b1d37b06.mp4
+
 As we can see, it's not accurate but still a nice result :smile:
 
 #### It is still a work in progress
+
+
