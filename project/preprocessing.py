@@ -52,7 +52,8 @@ def preprocess_ct_scan(img_path, label_path, output_path_prefix, f_name, size,
 
 def preprocess(input_data_dir, input_labels_dir, output_dir, frames_to_skip, size, orientation, vgg_compatible,
                val_split=0.1):
-    valid_files = [scan_file for scan_file in os.listdir(input_data_dir) if scan_file.endswith('.nii')]
+    valid_files = [scan_file for scan_file in os.listdir(input_data_dir) if scan_file.startswith('lung') and
+                   scan_file.endswith('.nii.gz')]
     train_size = len(valid_files) * (1-val_split)
     for idx, scan_file in tqdm(enumerate(valid_files)):
         output_prefix = 'train' if idx < train_size else 'val'

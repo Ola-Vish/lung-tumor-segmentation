@@ -7,5 +7,6 @@ torchvision
 torchmetrics
 opencv-python
 nibabel
-imgaug
+imgaug>=0.4.0
 celluloid
+wandb

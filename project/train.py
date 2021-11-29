@@ -11,10 +11,10 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 from tqdm import tqdm
 
-from .models.lit_segmentation_model import LitLungTumorSegModel
-from .models.segnet import SegNet
-from .datasets.lung_tumor_dataset import get_dataset
-from .loggers.image_logger import ImagePredictionLogger
+from project.models.lit_segmentation_model import LitLungTumorSegModel
+from project.models.segnet import SegNet
+from project.datasets.lung_tumor_dataset import get_dataset
+from project.loggers.image_logger import ImagePredictionLogger
 
 
 def get_class_balancing_weights(training_data):
@@ -29,7 +29,7 @@ def get_weighted_random_sampler(training_data, neg_weight, pos_weight):
     return torch.utils.data.sampler.WeightedRandomSampler(weighted_list, len(weighted_list))
 
 
-def train_model(input_args):
+def train_model(input_args, encoder_channels, decoder_channels):
     pl.seed_everything(1234)
 
     aug_pipeline = iaa.Sequential([
@@ -54,16 +54,15 @@ def train_model(input_args):
                                            shuffle=True)
     print(f"There are {len(training_data)} train images and {len(validation_data)} val images")
 
-    segnet = SegNet(input_args.encoder_channels, input_args.decoder_channels, input_args.num_classes,
-                    input_args.warm_start)
+    segnet = SegNet(encoder_channels, decoder_channels, input_args.num_classes, input_args.warm_start)
     loss_fn = torch.nn.CrossEntropyLoss(weight=torch.Tensor([neg_weight, pos_weight]))
-    model = LitLungTumorSegModel(segnet, loss_fn, input_args.learning_rate, input_args.lr_scheduler_patience,
+    model = LitLungTumorSegModel(segnet, loss_fn, input_args.num_classes, input_args.learning_rate, input_args.lr_scheduler_patience,
                                  input_args.lr_scheduler_threshold)
 
     visualizations_samples = next(iter(visualizations_dataloader))
     images_saving_callback = ImagePredictionLogger(visualizations_samples)
     learning_rate_callback = LearningRateMonitor(logging_interval='step')
-    checkpoint_callback = ModelCheckpoint(monitor='Val IOU', save_top_k=input_args.top_k)
+    checkpoint_callback = ModelCheckpoint(monitor='Val IOU', save_top_k=input_args.top_k_checkpoints, mode='max')
     early_stopping_callback = EarlyStopping(monitor='Val Loss', min_delta=1e-5,
                                             patience=input_args.early_stopping_patience)
 
@@ -72,7 +71,7 @@ def train_model(input_args):
     wandb_logger.watch(model)
     trainer = pl.Trainer(gpus=gpus, logger=wandb_logger, log_every_n_steps=1,
                          callbacks=[checkpoint_callback, early_stopping_callback, images_saving_callback,
-                                    learning_rate_callback], max_epochs=input_args.max_epochs)
+                                    learning_rate_callback], max_epochs=input_args.num_epochs)
 
     trainer.fit(model, train_dataloader, validation_dataloader)
 
@@ -82,19 +81,17 @@ def cli_main():
     parser.add_argument('--batch_size', default=16, type=int)
     parser.add_argument('--top_k_checkpoints', type=int, default=5)
     parser.add_argument('--early_stopping_patience', type=int, default=10)
-    parser.add_argument('--max_epochs', type=int, default=100)
+    parser.add_argument('--num_epochs', type=int, default=100)
     parser.add_argument('--project_name', type=str, default="lung-tumor-segmentation-segnet")
     parser.add_argument('--preprocessed_input_dir', type=str, default=os.getcwd())
     parser.add_argument('--num_classes', type=int, default=2)
     parser.add_argument('--warm_start', type=bool, default=True)
-    parser.add_argument('--encoder_channels', type=tuple, default=(3, 64, 128, 256, 512, 512))
-    parser.add_argument('--decoder_channels', type=tuple, default=(512, 512, 256, 128, 64, 64))
 
     parser = pl.Trainer.add_argparse_args(parser)
     parser = LitLungTumorSegModel.add_model_specific_args(parser)
     args = parser.parse_args()
 
-    train_model(args)
+    train_model(args, encoder_channels=(3, 64, 128, 256, 512, 512), decoder_channels=(512, 512, 256, 128, 64, 64))
 
 
 if __name__ == '__main__':
