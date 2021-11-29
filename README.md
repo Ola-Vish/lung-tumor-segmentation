@@ -18,9 +18,10 @@ To run this project yourself:
 
 # Results
 So far, using the architecture proposed in the [SegNet paper](https://arxiv.org/pdf/1511.00561.pdf), I reached nice results (0.88 dice score, 0.75 IoU on the validation set)
-Example results:
-![Ground Truth mask of a tumor](/images/gt_1560.PNG)
-![Predicted mask of the same tumor](/images/pred_1560.PNG)
+
+Example result:
+
+![Side by Side](/images/sidebyside.png)
 
 As we can see, it's not accurate but still a nice result :smile:
 
