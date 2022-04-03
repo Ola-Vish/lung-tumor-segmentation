@@ -9,6 +9,9 @@ In order for this project to log things properly, you need to:
    - run **wandb login** in your terminal and provide your own key
 
 To run this project yourself:
+
+**Python 3.7 is required.** 
+
 1. Clone the project, cd into project directory and run pip install -e .
 2. Install the packages from the requirements.txt file in your python env.
 3. Download the medical decathlon lung tumor data and extract it to a folder.
