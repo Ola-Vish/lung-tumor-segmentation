@@ -7,6 +7,7 @@ import numpy as np
 import nibabel as nib
 
 from project.models.lit_segmentation_model import LitLungTumorSegModel
+from project.models.segnet import *
 
 
 def ct_slices_generator(img_path, size=(224, 224), orientation=('L', 'A', 'S'), vgg_compatible=True,
